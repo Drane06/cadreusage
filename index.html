@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Découvrir le cadre d'usage de l'IA en éducation</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root{
+      --violet-1:#667eea; --violet-2:#764ba2; --green-1:#48bb78; --green-2:#38a169; 
+      --orange-1:#ed8936; --orange-2:#dd6b20; --teal:#38b2ac; --muted:#666;
+      --blue-light: #4299e1; --red-trap: #c53030; --yellow-accent: #f6e05e;
+      --border-color: #e2e8f0; --completed: #e0f2f1; --drop-zone-bg: #eef2ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, var(--green-1) 0%, var(--violet-2) 100%);
+      padding: 20px; min-height: 10vh; margin: 0;
+    }
+    .container {
+      max-width: 1100px; margin: 0 auto; background: white; border-radius: 20px; padding: 40px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1, h2, h3 { color: var(--green-1); }
+    h1 { text-align:center; margin-bottom:15px; font-size: 2em; }
+    .subtitle { text-align:center; color: var(--muted); margin-bottom: 35px; font-size: 1.1em; }
+    .activity {
+      background: #f8f9ff; border-radius: 12px; padding: 25px; margin-bottom: 25px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 2px solid var(--border-color);
+    }
+    .activity h2 { margin-top: 0; font-size: 1.5em; }
+
+    /* Styles par défaut pour les boutons de CHOIX (Défi 1, Q2, Q3) */
+    button {
+      margin: 5px; 
+      background: white; 
+      color: var(--green-2); 
+      border: 2px solid var(--green-1); 
+      padding: 10px 20px; 
+      border-radius: 999px;
+      cursor: pointer; 
+      font-weight: 600; 
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: all .25s ease; 
+      font-size: 0.95em;
+    }
+    button:hover { 
+      transform: translateY(-1px); 
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15); 
+      background: #f0fdf4; /* Light green hover */
+    }
+
+    /* Styles pour les boutons d'ACTION PRIMAIRE (Valider/Vérifier) - LE DÉGRADÉ VERT EST ICI */
+    .btn-primary {
+      background: linear-gradient(135deg, var(--green-1), var(--green-2));
+      color: white; 
+      border: none;
+      padding: 12px 24px; 
+      font-size: 1em;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      font-weight: 700;
+    }
+    .btn-primary:hover { 
+      transform: translateY(-2px); 
+      box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+      /* Invert gradient on hover for visual feedback */
+      background: linear-gradient(135deg, var(--green-2), var(--green-1));
+    }
+
+    .feedback {
+      margin-top: 15px; padding: 15px; border-radius: 8px; display: none; font-weight: 500;
+      line-height: 1.6;
+    }
+    .correct { background: var(--completed); color: var(--green-2); border: 2px solid var(--green-1); }
+    .incorrect { background: #fdecea; color: var(--red-trap); border: 2px solid var(--red-trap); }
+    label { font-size: 1em; line-height: 1.5; display: block; }
+    input[type="checkbox"] { margin-right: 10px; width: 18px; height: 18px; cursor: pointer; }
+    .drop-zone {
+      background: var(--drop-zone-bg); padding: 15px; border-radius: 8px; 
+      min-height: 80px; margin: 10px 0; border: 2px dashed var(--border-color);
+      transition: all 0.3s ease;
+    }
+    .drop-zone strong { display: block; margin-bottom: 8px; }
+    .draggable-item {
+      background: white; padding: 12px; border-radius: 8px; cursor: move; 
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin: 8px 0;
+      transition: all 0.2s ease;
+    }
+    .draggable-item:hover { transform: scale(1.02); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+    .checked-label { border-color: var(--green-1) !important; background: #f0fdf4 !important; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    
+    /* Styles spécifiques à la Progressivité (Défi 4 Q1) */
+    .grid-2-progressivite { 
+        display: grid; 
+        grid-template-columns: 3fr 1fr; 
+        gap: 15px; 
+        align-items: center; 
+        padding: 10px;
+        border-bottom: 1px dotted var(--border-color);
+    }
+    .grid-2-progressivite:last-of-type { border-bottom: none; }
+    .grid-2-progressivite label { font-weight: 400; }
+    .progressivity-select {
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        background: white;
+    }
+
+    /* Styles pour le Défi 6 (Bilan) */
+    .slider-container {
+        margin-bottom: 20px;
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background: #ffffff;
+    }
+    .slider-container label {
+        font-weight: 600;
+        margin-bottom: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: var(--violet-2);
+    }
+    .slider-container input[type="range"] {
+        width: 100%;
+        height: 10px;
+        -webkit-appearance: none;
+        appearance: none;
+        background: var(--border-color);
+        border-radius: 5px;
+        outline: none;
+        margin-top: 5px;
+    }
+    .slider-container input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--violet-1);
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    .slider-container input[type="range"]::-webkit-slider-thumb:hover {
+        background: var(--violet-2);
+    }
+    .global-score-display {
+        text-align: center;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-size: 1.6em;
+        font-weight: bold;
+        background: #fff;
+        border: 3px solid var(--violet-1);
+        color: var(--violet-2);
+    }
+    .recommendations {
+        margin-top: 30px;
+        padding: 20px;
+        background: #f0fdf4;
+        border: 2px solid var(--green-1);
+        border-radius: 12px;
+    }
+    .recommendations strong {
+        display: block;
+        color: var(--green-2);
+        font-size: 1.1em;
+        margin-bottom: 10px;
+    }
+    .recommendations ul {
+        list-style: disc;
+        padding-left: 25px;
+        margin: 0;
+    }
+    
+    @media (max-width: 768px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .grid-2-progressivite { grid-template-columns: 1fr; gap: 5px; }
+      .container { padding: 20px; }
+      button { font-size: 0.9em; padding: 10px 18px; }
+      .btn-primary { font-size: 0.95em; padding: 11px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎓 Découvrir le cadre d'usage de l'IA en éducation</h1>
+    <p class="subtitle">5 défis interactifs pour maîtriser les enjeux, principes et obligations du cadre officiel (Juin 2025)</p>
+    
+    <div class="activity">
+      <h2>🎯 Défi 1 : Dilemmes éthiques en situation réelle (2 parties)</h2>
+      
+      <!-- SOUS-DÉFI A : L'ÉLÈVE ET LE DEVOIR -->
+      <div style="margin-bottom: 25px; border-bottom: 1px dashed var(--border-color); padding-bottom: 20px;">
+        <h3>Sous-défi A : Suspicion de fraude de l'élève</h3>
+        <p><strong>Scénario :</strong> Un élève de 3e vous remet un exposé. Le texte est fluide, bien structuré, mais vous soupçonnez l'usage d'une IA générative sans travail personnel.</p>
+        <p><strong>Quelle est la réaction recommandée par le cadre ?</strong></p>
+        <!-- Rétablissement des boutons classiques pour le défi 1 -->
+        <button onclick="showFeedback('f1a','✔ <strong>Excellente réponse !</strong><br>Le cadre préconise d\'engager un <strong>dialogue pédagogique</strong> pour vérifier l\'appropriation du contenu. Si l\'IA a été utilisée sans autorisation et sans travail personnel, c\'est une fraude. Proposez-lui de refaire le travail en montrant son raisonnement (p.10 du cadre).',true)">Engager un dialogue pédagogique et demander la vérification des sources</button>
+        <button onclick="showFeedback('f1a','✘ <strong>Attention, ce n\'est pas conforme !</strong><br>Sanctionner sans dialogue rate une opportunité d\'apprentissage et ne respecte pas le principe de bienveillance. Le cadre privilégie l\'adaptation de l\'évaluation et le dialogue.',false)">Sanctionner immédiatement par un zéro pour fraude</button>
+        <button onclick="showFeedback('f1a','✘ <strong>Attention, ce n\'est pas conforme !</strong><br>Accepter le travail sans vérification encourage la fraude et nuit aux apprentissages. Même si le texte est bon, il faut s\'assurer que l\'apprentissage a eu lieu.',false)">Accepter le travail et considérer que l'élève a été efficace</button>
+        <div id="f1a" class="feedback"></div>
+      </div>
+      
+      <!-- SOUS-DÉFI B : LE COLLÈGUE ET LES APPRÉCIATIONS -->
+      <div>
+        <h3>Sous-défi B : Utilisation de l'IA par un enseignant</h3>
+        <p><strong>Scénario :</strong> Votre collègue vous montre ChatGPT en train de rédiger ses appréciations de bulletin : <em>"Ça me fait gagner un temps fou !"</em></p>
+        <p><strong>Quelle recommandation du cadre devez-vous lui rappeler ?</strong></p>
+        <!-- Rétablissement des boutons classiques pour le défi 1 -->
+        <button onclick="showFeedback('f1b','✔ <strong>Exact !</strong> L\'IA peut assister à la rédaction (inspiration, correction grammaticale) mais ne peut remplacer le <strong>jugement professionnel</strong>. Les appréciations finales doivent être personnalisées et validées humainement, conformément au principe de <strong>Supervision Humaine</strong> (p.9).',true)">Rappeler l'importance de la supervision humaine et du jugement professionnel</button>
+        <button onclick="showFeedback('f1b','✘ <strong>Attention au manque de nuance !</strong><br>Interdire l\'IA totalement va à l\'encontre du cadre qui encourage son usage encadré. Le problème est le remplacement intégral du jugement.',false)">Lui dire d'arrêter immédiatement toute utilisation d'outil IA en tant que professionnel</button>
+        <button onclick="showFeedback('f1b','✘ <strong>Risqué !</strong><br>Adopter cette méthode est contraire au principe de Responsabilité Professionnelle. Toute décision pédagogique (comme une appréciation) doit être validée et personnalisée par l\'enseignant.',false)">Adopter sa méthode car elle permet un gain de temps considérable</button>
+        <div id="f1b" class="feedback"></div>
+      </div>
+    </div>
+    
+    <div class="activity">
+      <h2>🔐 Défi 2 : Protection des données - Que peut-on saisir ?</h2>
+      <p><strong>Situation :</strong> Vous voulez créer des exercices différenciés avec ChatGPT pour votre classe de 5e. <strong>Cochez TOUTES les données</strong> que vous pouvez légalement et éthiquement saisir dans une IA grand public :</p>
+      <div style="margin: 15px 0;">
+        <label style="margin: 10px 0; padding: 12px; background: white; border-radius: 8px; cursor: pointer; border: 2px solid var(--border-color); transition: all 0.2s;">
+          <input type="checkbox" id="d1" onchange="styleCheckbox(this)"> Des extraits de programmes officiels du cycle 4
+        </label>
+        <label style="margin: 10px 0; padding: 12px; background: white; border-radius: 8px; cursor: pointer; border: 2px solid var(--border-color); transition: all 0.2s;">
+          <input type="checkbox" id="d2" onchange="styleCheckbox(this)"> Les prénoms de vos 3 élèves en difficulté pour personnaliser les exercices
+        </label>
+        <label style="margin: 10px 0; padding: 12px; background: white; border-radius: 8px; cursor: pointer; border: 2px solid var(--border-color); transition: all 0.2s;">
+          <input type="checkbox" id="d3" onchange="styleCheckbox(this)"> Un texte du domaine public (Victor Hugo, par exemple)
+        </label>
+        <label style="margin: 10px 0; padding: 12px; background: white; border-radius: 8px; cursor: pointer; border: 2px solid var(--border-color); transition: all 0.2s;">
+          <input type="checkbox" id="d4" onchange="styleCheckbox(this)"> Des statistiques anonymisées sur les résultats nationaux au DNB
+        </label>
+        <label style="margin: 10px 0; padding: 12px; background: white; border-radius: 8px; cursor: pointer; border: 2px solid var(--border-color); transition: all 0.2s;">
+          <input type="checkbox" id="d5" onchange="styleCheckbox(this)"> Une copie d'élève scannée pour demander une correction automatique
+        </label>
+        <label style="margin: 10px 0; padding: 12px; background: white; border-radius: 8px; cursor: pointer; border: 2px solid var(--border-color); transition: all 0.2s;">
+          <input type="checkbox" id="d6" onchange="styleCheckbox(this)"> Des ressources éducatives libres (Eduscol, Canopé)
+        </label>
+      </div>
+      <button onclick="validateData()" class="btn-primary">Valider mes choix</button>
+      <div id="f2" class="feedback"></div>
+    </div>
+    
+    <div class="activity">
+      <h2>🧩 Défi 3 : Associez principes et pratiques concrètes</h2>
+      <p><strong>Glissez chaque exemple vers le principe correspondant du cadre d'usage :</strong></p>
+      <div class="grid-2" style="margin: 20px 0;">
+        <div>
+          <h3 style="color: var(--green-1); font-size: 1.1em; margin-top: 0; border-bottom: none; padding-bottom: 0;">📋 Principes</h3>
+          <div class="drop-zone" data-principle="frugalite">
+            <strong>🌱 Frugalité numérique</strong>
+            <div class="drop-content"></div>
+          </div>
+          <div class="drop-zone" data-principle="transparence">
+            <strong>👁️ Transparence</strong>
+            <div class="drop-content"></div>
+          </div>
+          <div class="drop-zone" data-principle="critique">
+            <strong>🎯 Esprit critique</strong>
+            <div class="drop-content"></div>
+          </div>
+          <div class="drop-zone" data-principle="pedagogie">
+            <strong>👨‍🏫 Usage pédagogique progressif</strong>
+            <div class="drop-content"></div>
+          </div>
+        </div>
+        <div>
+          <h3 style="color: var(--violet-1); font-size: 1.1em; margin-top: 0; border-bottom: none; padding-bottom: 0;">💡 Exemples pratiques</h3>
+          <div id="examples">
+            <div class="draggable-item" draggable="true" data-answer="frugalite" style="border: 2px solid var(--green-1);">
+              Avant d'utiliser ChatGPT, je vérifie si une recherche Google ou Wikipédia suffit
+            </div>
+            <div class="draggable-item" draggable="true" data-answer="transparence" style="border: 2px solid var(--violet-1);">
+              J'explique à mes élèves que le plan de cours a été co-conçu avec une IA
+            </div>
+            <div class="draggable-item" draggable="true" data-answer="critique" style="border: 2px solid var(--orange-1);">
+              Je compare les réponses de l'IA avec des sources fiables avant de les utiliser
+            </div>
+            <div class="draggable-item" draggable="true" data-answer="pedagogie" style="border: 2px solid var(--teal);">
+              En 6e je sensibilise aux IA, en 4e j'autorise l'usage encadré, au lycée l'autonomie
+            </div>
+          </div>
+        </div>
+      </div>
+      <button onclick="checkMatching()" class="btn-primary">Vérifier mes associations</button>
+      <div id="f3" class="feedback"></div>
+    </div>
+    
+    <div class="activity">
+      <h2>⚡ Défi 4 : Quiz express multi-questions</h2>
+      
+      <!-- QUESTION 1/3 SUR LA PROGRESSIVITÉ ET L'USAGE PAR NIVEAU -->
+      <div style="margin-bottom: 25px;">
+        <p><strong>Question 1/3 : Principe de Progressivité.</strong> Associez chaque activité pédagogique au niveau approprié.</p>
+
+        <!-- Mise à jour ici : suppression des instructions A, B, C -->
+        <div style="font-weight: 600; border-bottom: 2px solid var(--border-color); padding-bottom: 8px; margin-bottom: 15px;">
+            <span>Activité</span>
+        </div>
+
+        <!-- Activité 1 -->
+        <div class="grid-2-progressivite">
+            <label>1. Sensibilisation aux algorithmes (débranchée, sans manipulation d'outil génératif).</label>
+            <select id="q4_a1" class="progressivity-select">
+                <option value="">-- Choisir --</option>
+                <option value="A">A = Avant la 4e</option>
+                <option value="B">B = 4e - 3e</option>
+                <option value="C">C = Lycée</option>
+            </select>
+        </div>
+        <!-- Activité 2 -->
+        <div class="grid-2-progressivite">
+            <label>2. Analyse critique encadrée d'un texte IA (guide l'élève à identifier erreurs factuelles).</label>
+            <select id="q4_a2" class="progressivity-select">
+                <option value="">-- Choisir --</option>
+                <option value="A">A = Avant la 4e</option>
+                <option value="B">B = 4e - 3e</option>
+                <option value="C">C = Lycée</option>
+            </select>
+        </div>
+        <!-- Activité 3 -->
+        <div class="grid-2-progressivite">
+            <label>3. Projet de recherche autonome avec IA (exploration d'hypothèses, préparation d'exposé complexe).</label>
+            <select id="q4_a3" class="progressivity-select">
+                <option value="">-- Choisir --</option>
+                <option value="A">A = Avant la 4e</option>
+                <option value="B">B = 4e - 3e</option>
+                <option value="C">C = Lycée</option>
+            </select>
+        </div>
+        <!-- Activité 4 -->
+        <div class="grid-2-progressivite">
+            <label>4. Discussion sur les impacts environnementaux et éthiques (sans manipulation d'outil).</label>
+            <select id="q4_a4" class="progressivity-select">
+                <option value="">-- Choisir --</option>
+                <option value="A">A = Avant la 4e</option>
+                <option value="B">B = 4e - 3e</option>
+                <option value="C">C = Lycée</option>
+            </select>
+        </div>
+        <!-- Activité 5 -->
+        <div class="grid-2-progressivite">
+            <label>5. Atelier de rédaction de prompts efficaces pour co-créer des quiz de révision en classe.</label>
+            <select id="q4_a5" class="progressivity-select">
+                <option value="">-- Choisir --</option>
+                <option value="A">A = Avant la 4e</option>
+                <option value="B">B = 4e - 3e</option>
+                <option value="C">C = Lycée</option>
+            </select>
+        </div>
+        
+        <button onclick="validateProgressivity()" class="btn-primary">Valider les associations</button>
+        
+        <div id="f4a" class="feedback"></div>
+      </div>
+      <!-- FIN QUESTION 1/3 -->
+      
+      <div style="margin-bottom: 25px;">
+        <p><strong>Question 2/3 :</strong> Un élève a rendu un devoir manifestement rédigé par ChatGPT. Que dit le cadre sur les outils de détection ?</p>
+        <button onclick="showFeedback('f4b','✘ Non, c\'est même déconseillé ! Ces logiciels manquent de fiabilité et peuvent faussement accuser des élèves (p.10).',false)">Vous devez utiliser un logiciel de détection</button>
+        <button onclick="showFeedback('f4b','✔ <strong>Correct !</strong> Le cadre précise : \"en raison de leur manque de fiabilité, l\'utilisation des logiciels de détection de contenus générés par l\'IA n\'est pas recommandée\" (p.10). Privilégiez le dialogue pédagogique.',true)">L'usage de ces logiciels n'est pas recommandé</button>
+        <button onclick="showFeedback('f4b','✘ Il faut agir ! Mais pas avec des outils de détection peu fiables. Le dialogue et l\'adaptation des évaluations sont préférables.',false)">Vous ne pouvez rien faire</button>
+        <div id="f4b" class="feedback"></div>
+      </div>
+      <div style="margin-bottom: 25px;">
+        <p><strong>Question 3/3 :</strong> Concernant l'impact environnemental, que recommande le cadre ?</p>
+        <button onclick="showFeedback('f4c','✔ <strong>Excellent !</strong> Le principe de frugalité numérique (p.8) : \"l\'IA ne doit être utilisée que si aucune autre solution moins coûteuse écologiquement ne répond de façon satisfaisante au besoin\". Une requête IA est 10 fois plus énergivore qu\'une recherche Web (p.6).',true)">N'utiliser l'IA que si aucune solution plus écologique ne convient</button>
+        <button onclick="showFeedback('f4c','✘ L\'impact écologique est un enjeu majeur ! Le cadre insiste sur la frugalité numérique et la sensibilisation aux impacts environnementaux.',false)">L'impact environnemental n'est pas abordé</button>
+        <button onclick="showFeedback('f4c','✘ Pas tout à fait. Le cadre encourage la frugalité et la réflexion mais ne va pas jusqu\'à l\'interdiction totale.',false)">Interdire totalement l'IA</button>
+        <div id="f4c" class="feedback"></div>
+      </div>
+    </div>
+    
+    <div class="activity">
+      <h2>🚫 Défi 5 : Trouvez LES intrus (plusieurs réponses possibles)</h2>
+      <p><strong>Parmi ces 6 usages, identifiez TOUS ceux qui sont interdits ou déconseillés par le cadre :</strong></p>
+      <div style="margin: 15px 0;">
+        <label style="margin: 10px 0; padding: 12px; background: white; border-radius: 8px; cursor: pointer; border: 2px solid var(--border-color); transition: all 0.2s;">
+          <input type="checkbox" id="u1" onchange="styleCheckbox(this)"> Utiliser ChatGPT pour générer un plan de cours, puis le vérifier et l'adapter
+        </label>
+        <label style="margin: 10px 0; padding: 12px; background: white; border-radius: 8px; cursor: pointer; border: 2px solid var(--border-color); transition: all 0.2s;">
+          <input type="checkbox" id="u2" onchange="styleCheckbox(this)"> Demander aux élèves de 3e de créer un compte ChatGPT pour faire un exercice
+        </label>
+        <label style="margin: 10px 0; padding: 12px; background: white; border-radius: 8px; cursor: pointer; border: 2px solid var(--border-color); transition: all 0.2s;">
+          <input type="checkbox" id="u3" onchange="styleCheckbox(this)"> Faire analyser un texte généré par IA en classe de 4e pour en discuter les biais
+        </label>
+        <label style="margin: 10px 0; padding: 12px; background: white; border-radius: 8px; cursor: pointer; border: 2px solid var(--border-color); transition: all 0.2s;">
+          <input type="checkbox" id="u4" onchange="styleCheckbox(this)"> Saisir les notes et prénoms de vos élèves dans une IA pour générer des statistiques
+        </label>
+        <label style="margin: 10px 0; padding: 12px; background: white; border-radius: 8px; cursor: pointer; border: 2px solid var(--border-color); transition: all 0.2s;">
+          <input type="checkbox" id="u5" onchange="styleCheckbox(this)"> Utiliser un logiciel de détection d'IA pour sanctionner un élève suspecté de triche
+        </label>
+        <label style="margin: 10px 0; padding: 12px; background: white; border-radius: 8px; cursor: pointer; border: 2px solid var(--border-color); transition: all 0.2s;">
+          <input type="checkbox" id="u6" onchange="styleCheckbox(this)"> Laisser l'IA rédiger intégralement les appréciations du bulletin sans les relire
+        </label>
+      </div>
+      <button onclick="validateIntrus()" class="btn-primary">Valider mes réponses</button>
+      <div id="f5" class="feedback"></div>
+    </div>
+
+    <div class="activity">
+      <h2>🧠 Défi 6 : Votre bilan de maîtrise du cadre</h2>
+      <p>Positionnez les curseurs pour refléter votre niveau de confiance et de maîtrise sur chaque principe clé du cadre d'usage de l'IA, puis validez votre auto-évaluation.</p>
+      
+      <!-- Sliders -->
+      <div class="grid-2">
+          <div class="slider-container">
+            <label>Vigilance sur les données (RGPD) <span id="val-data">50%</span></label>
+            <input type="range" min="0" max="100" value="50" class="mastery-slider" data-principle="Vigilance sur les données" id="slider-data" oninput="updateSliderValue(this)">
+          </div>
+          <div class="slider-container">
+            <label>Impact environnemental (Frugalité) <span id="val-impact">50%</span></label>
+            <input type="range" min="0" max="100" value="50" class="mastery-slider" data-principle="Impact environnemental" id="slider-impact" oninput="updateSliderValue(this)">
+          </div>
+          <div class="slider-container">
+            <label>Transparence <span id="val-transparency">50%</span></label>
+            <input type="range" min="0" max="100" value="50" class="mastery-slider" data-principle="Transparence" id="slider-transparency" oninput="updateSliderValue(this)">
+          </div>
+          <div class="slider-container">
+            <label>Esprit critique <span id="val-critique">50%</span></label>
+            <input type="range" min="0" max="100" value="50" class="mastery-slider" data-principle="Esprit critique" id="slider-critique" oninput="updateSliderValue(this)">
+          </div>
+          <div class="slider-container">
+            <label>Supervision Humaine / Appréciations <span id="val-human">50%</span></label>
+            <input type="range" min="0" max="100" value="50" class="mastery-slider" data-principle="Supervision Humaine" id="slider-human" oninput="updateSliderValue(this)">
+          </div>
+          <div class="slider-container">
+            <label>Usage selon le niveau (Progressivité) <span id="val-level">50%</span></label>
+            <input type="range" min="0" max="100" value="50" class="mastery-slider" data-principle="Progressivité" id="slider-level" oninput="updateSliderValue(this)">
+          </div>
+      </div>
+
+      <button onclick="validateBilan()" class="btn-primary">Valider mon bilan</button>
+
+      <!-- Results Container (Hidden by default, shown after validation) -->
+      <div id="results-container" style="display:none; margin-top: 20px;">
+          <!-- Global Score Display -->
+          <div class="global-score-display">
+            Score global de maîtrise : <span id="global-score">50%</span>
+          </div>
+          <div id="mastery-level-description" style="text-align: center; font-style: italic; margin-bottom: 25px; font-weight: 500;">
+            En cours d'apprentissage
+          </div>
+        
+          <!-- Recommendations -->
+          <div id="recommendations" class="recommendations">
+            <strong>Prochaines étapes recommandées :</strong>
+            <ul id="recommendation-list">
+              <li>Félicitations ! Vous maîtrisez bien les principes.</li>
+            </ul>
+          </div>
+      </div>
+    </div>
+    <!-- FIN NOUVELLE ACTIVITÉ DE BILAN -->
+
+    
+    <div class="activity" style="background: linear-gradient(135deg, var(--green-1), var(--violet-2)); color: white; text-align: center; padding: 30px;">
+      <h2 style="color: white; margin-bottom: 20px;">🎓 Synthèse : Les 5 piliers à retenir</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;">
+        <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
+          <strong>1. Protection des données</strong><br>Jamais de données personnelles dans une IA grand public
+        </div>
+        <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
+          <strong>2. Supervision humaine</strong><br>L'IA assiste, ne remplace jamais votre expertise
+        </div>
+        <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
+          <strong>3. Esprit critique</strong><br>Toujours vérifier et croiser les sources
+        </div>
+        <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
+          <strong>4. Frugalité numérique</strong><br>Utiliser l'IA seulement si nécessaire
+        </div>
+        <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
+          <strong>5. Progressivité</strong><br>Sensibilisation → Encadrement (4e) → Autonomie (lycée)
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    function showFeedback(id, message, success){
+      const f = document.getElementById(id);
+      f.innerHTML = message;
+      f.className = success ? "feedback correct" : "feedback incorrect";
+      f.style.display = 'block';
+      f.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function styleCheckbox(checkbox) {
+      const label = checkbox.parentElement;
+      if(checkbox.checked) {
+        label.classList.add('checked-label');
+      } else {
+        label.classList.remove('checked-label');
+      }
+    }
+
+    // Défi 2 : Protection des données
+    function validateData() {
+      const d1 = document.getElementById('d1').checked;
+      const d2 = document.getElementById('d2').checked;
+      const d3 = document.getElementById('d3').checked;
+      const d4 = document.getElementById('d4').checked;
+      const d5 = document.getElementById('d5').checked;
+      const d6 = document.getElementById('d6').checked;
+            
+      // Correct: d1, d3, d4, d6 cochés. d2, d5 non cochés.
+      const correct = d1 && !d2 && d3 && d4 && !d5 && d6;
+            
+      if(correct) {
+        showFeedback('f2',
+          '✔ <strong>Parfait !</strong> Vous avez identifié toutes les données autorisées :<br><br>' +
+          '✅ Programmes officiels, textes du domaine public, statistiques anonymisées, et ressources éducatives libres sont des données publiques ou anonymes.<br><br>' +
+          '❌ Les <strong>prénoms</strong> et la <strong>copie d\'élève scannée</strong> contiennent des données à caractère personnel (RGPD, p.8) : INTERDIT dans les IA grand public.',
+          true);
+      } else {
+        let errors = [];
+        if(!d1) errors.push('Les programmes officiels sont autorisés (donnée publique).');
+        if(d2) errors.push('Les prénoms sont des données personnelles : INTERDIT (RGPD).');
+        if(!d3) errors.push('Les œuvres du domaine public sont OK (pas de droits d\'auteur).');
+        if(!d4) errors.push('Les statistiques anonymisées sont OK.');
+        if(d5) errors.push('Une copie d\'élève contient des données personnelles : INTERDIT.');
+        if(!d6) errors.push('Les ressources éducatives libres sont OK (conçues pour le partage).');
+                
+        showFeedback('f2',
+          '✘ <strong>Pas tout à fait...</strong> Voici les corrections à apporter :<br>' + errors.join('<br>') +
+          '<br><br><strong>Principe clé (p.8) :</strong> Aucune donnée confidentielle ou personnelle dans les IA grand public.',
+          false);
+      }
+    }
+    
+    // Défi 3 : Drag and Drop
+    let draggedElement = null;
+    let associations = {};
+    document.addEventListener('DOMContentLoaded', function() {
+      const draggables = document.querySelectorAll('.draggable-item');
+      const dropZones = document.querySelectorAll('.drop-zone');
+
+      // Gestion du Drag
+      draggables.forEach(item => {
+        item.addEventListener('dragstart', function(e) {
+          draggedElement = this;
+          this.style.opacity = '0.5';
+        });
+        item.addEventListener('dragend', function() {
+          this.style.opacity = '1';
+        });
+      });
+
+      // Gestion du Drop
+      dropZones.forEach(zone => {
+        zone.addEventListener('dragover', function(e) {
+          e.preventDefault(); // Nécessaire pour autoriser le drop
+          this.style.background = '#dbeafe';
+          this.style.borderColor = 'var(--blue-light)';
+        });
+        zone.addEventListener('dragleave', function() {
+          this.style.background = 'var(--drop-zone-bg)';
+          this.style.borderColor = 'var(--border-color)';
+        });
+        zone.addEventListener('drop', function(e) {
+          e.preventDefault();
+          this.style.background = 'var(--drop-zone-bg)';
+          this.style.borderColor = 'var(--border-color)';
+                    
+          if(draggedElement) {
+            const content = this.querySelector('.drop-content');
+            content.innerHTML = ''; // Nettoyer l'ancienne association
+            const clone = draggedElement.cloneNode(true);
+            clone.style.margin = '10px 0 0 0';
+            clone.removeAttribute('draggable'); // Rendre l'élément non déplaçable une fois posé
+            content.appendChild(clone);
+            
+            // Enregistrer l'association (zone data-principle -> item data-answer)
+            associations[this.dataset.principle] = draggedElement.dataset.answer;
+          }
+        });
+      });
+    });
+
+    function checkMatching() {
+      const correct = associations.frugalite === 'frugalite' &&
+                      associations.transparence === 'transparence' &&
+                      associations.critique === 'critique' &&
+                      associations.pedagogie === 'pedagogie';
+            
+      if(Object.keys(associations).length !== 4) {
+        showFeedback('f3', '✘ <strong>Attention :</strong> Veuillez associer les 4 exemples aux 4 principes.', false);
+        return;
+      }
+
+      if(correct) {
+        showFeedback('f3',
+          '✔ <strong>Bravo, toutes les associations sont correctes !</strong><br><br>' +
+          '🌱 <strong>Frugalité numérique</strong> : privilégier des solutions moins énergivores (p.8)<br>' +
+          '👁️ <strong>Transparence</strong> : informer explicitement de l\'usage de l\'IA (p.9)<br>' +
+          '🎯 <strong>Esprit critique</strong> : toujours vérifier et croiser les sources (p.13)<br>' +
+          '👨‍🏫 <strong>Usage progressif</strong> : sensibilisation → encadrement → autonomie (p.9)',
+          true);
+      } else {
+        showFeedback('f3', '✘ <strong>Certaines associations ne sont pas correctes.</strong><br><br>Vérifiez que chaque pratique correspond au bon principe. (Ex. : Le co-développement d\'un cours est lié à la Transparence).', false);
+      }
+    }
+    
+    // Défi 4 : Nouvelle fonction de validation pour la Progressivité (Question 1)
+    function validateProgressivity() {
+      const q4_a1 = document.getElementById('q4_a1').value; // A
+      const q4_a2 = document.getElementById('q4_a2').value; // B
+      const q4_a3 = document.getElementById('q4_a3').value; // C
+      const q4_a4 = document.getElementById('q4_a4').value; // A
+      const q4_a5 = document.getElementById('q4_a5').value; // B
+      
+      const correctAnswers = {
+        'q4_a1': 'A',
+        'q4_a2': 'B',
+        'q4_a3': 'C',
+        'q4_a4': 'A',
+        'q4_a5': 'B'
+      };
+
+      let correctCount = 0;
+      let incorrectDetails = '';
+      let allSelected = true;
+
+      for (const id in correctAnswers) {
+        const selectedValue = document.getElementById(id).value;
+        if (selectedValue === "") {
+          allSelected = false;
+          break;
+        }
+        if (selectedValue === correctAnswers[id]) {
+          correctCount++;
+        } else {
+          incorrectDetails += `<li>Activité ${id.slice(-1)} : Vous avez choisi <strong>${selectedValue}</strong>, mais la réponse attendue est **${correctAnswers[id]}**.</li>`;
+        }
+      }
+
+      if (!allSelected) {
+        showFeedback('f4a', '✘ **Veuillez choisir une option pour chaque activité** afin de valider l\'exercice.', false);
+        return;
+      }
+
+      if (correctCount === 5) {
+        showFeedback('f4a', 
+          '✔ **Félicitations !** Vous maîtrisez le principe de **Progressivité** (p.9 du cadre) :<br><br>' +
+          '**A (Avant 4e) :** Sensibilisation théorique et éthique, sans manipulation d\'outil génératif par les élèves (Act. 1 & 4).<br>' +
+          '**B (4e-3e) :** Utilisation encadrée pour la critique, la co-création de contenus, ou l\'aide à la structure (Act. 2 & 5).<br>' +
+          '**C (Lycée) :** Usage autonome et réflexif dans le cadre de projets complexes (recherche, dissertation) (Act. 3).',
+          true
+        );
+      } else {
+        showFeedback('f4a', 
+          `✘ **${correctCount}/5 associations correctes.** Voici les corrections :<br><ul>${incorrectDetails}</ul>` +
+          '<br>**Rappel :** Le passage à l\'**utilisation concrète** de l\'IA par l\'élève (B et C) ne se fait qu\'après la phase de **sensibilisation** (A).',
+          false
+        );
+      }
+    }
+
+    // Défi 5 : Trouver les intrus
+    function validateIntrus() {
+      // Les intrus (Interdit/Déconseillé) sont u2, u4, u5, u6.
+      const u1 = document.getElementById('u1').checked; // Autorisé
+      const u2 = document.getElementById('u2').checked; // Interdit (création de compte)
+      const u3 = document.getElementById('u3').checked; // Autorisé (esprit critique)
+      const u4 = document.getElementById('u4').checked; // Interdit (données personnelles)
+      const u5 = document.getElementById('u5').checked; // Déconseillé (détecteurs)
+      const u6 = document.getElementById('u6').checked; // Interdit (supervision humaine)
+
+      // Les réponses correctes sont celles qui sélectionnent u2, u4, u5, et u6, et NE sélectionnent PAS u1, u3.
+      const correct = !u1 && u2 && !u3 && u4 && u5 && u6;
+            
+      if(correct) {
+        showFeedback('f5',
+          '✔ <strong>Parfait ! Vous avez identifié tous les usages problématiques :</strong><br><br>' +
+          '❌ <strong>Créer un compte ChatGPT</strong> : Interdit ! (p.8)<br>' +
+          '❌ <strong>Saisir notes et prénoms</strong> : Violation du RGPD ! (p.8)<br>' +
+          '❌ <strong>Logiciels de détection</strong> : Déconseillé car peu fiables (p.10)<br>' +
+          '❌ <strong>Appréciations 100% IA</strong> : Violation de la supervision humaine. (p.9)<br><br>' +
+          '✅ Les autres usages (u1, u3) sont autorisés avec vérification et encadrement.',
+          true);
+      } else {
+        let feedback = '✘ <strong>Revoyez vos choix !</strong> Les usages interdits ou déconseillés sont :<br><ul>';
+        if(!u2) feedback += '<li>❌ Demander de créer un compte (INTERDIT)</li>';
+        if(!u4) feedback += '<li>❌ Saisir des données personnelles (INTERDIT)</li>';
+        if(!u5) feedback += '<li>❌ Utiliser des logiciels de détection (DÉCONSEILLÉ)</li>';
+        if(!u6) feedback += '<li>❌ Déléguer intégralement les appréciations (INTERDIT)</li>';
+        if(u1) feedback += '<li>✅ Utiliser l\'IA pour un plan puis l\'adapter est AUTORISÉ.</li>';
+        if(u3) feedback += '<li>✅ Faire analyser un texte IA pour discuter des biais est AUTORISÉ.</li>';
+        
+        feedback += '</ul><br>Assurez-vous d\'avoir coché uniquement les 4 usages problématiques.';
+                
+        showFeedback('f5', feedback, false);
+      }
+    }
+    
+    // Défi 6 : Bilan de Maîtrise
+    
+    // 1. Met à jour la valeur affichée à côté du curseur
+    function updateSliderValue(slider) {
+        document.getElementById(`val-${slider.id.split('-')[1]}`).textContent = `${slider.value}%`;
+        // Masquer les résultats si l'utilisateur modifie un curseur après validation
+        document.getElementById('results-container').style.display = 'none';
+    }
+
+    // 2. Valide le bilan et affiche les résultats
+    function validateBilan() {
+      const sliders = document.querySelectorAll('.mastery-slider');
+      let totalScore = 0;
+      let principles = [];
+      
+      sliders.forEach(slider => {
+        const value = parseInt(slider.value);
+        totalScore += value;
+        
+        // Stocker le principe et le score pour les recommandations
+        principles.push({
+          name: slider.dataset.principle,
+          score: value,
+          id: slider.id
+        });
+      });
+      
+      const globalScore = Math.round(totalScore / sliders.length);
+      
+      // Mise à jour du score global
+      document.getElementById('global-score').textContent = `${globalScore}%`;
+      
+      // Mise à jour de la description du niveau de maîtrise
+      const descElement = document.getElementById('mastery-level-description');
+      if (globalScore < 40) {
+        descElement.textContent = "Initiation en cours. Une relecture approfondie du cadre est nécessaire pour éviter des erreurs critiques.";
+        descElement.style.color = 'var(--red-trap)';
+      } else if (globalScore < 65) {
+        descElement.textContent = "En cours d'apprentissage. Des points de vigilance précis sont à renforcer.";
+        descElement.style.color = 'var(--orange-1)';
+      } else if (globalScore < 85) {
+        descElement.textContent = "Bonne maîtrise. Vous appliquez les principes, mais assurez-vous de l'excellence sur les points les plus sensibles.";
+        descElement.style.color = 'var(--teal)';
+      } else {
+        descElement.textContent = "Excellente maîtrise ! Vous êtes un ambassadeur éclairé du cadre d'usage de l'IA.";
+        descElement.style.color = 'var(--green-2)';
+      }
+      
+      // Mise à jour des recommandations
+      const recommendationList = document.getElementById('recommendation-list');
+      recommendationList.innerHTML = '';
+      
+      // Trouver les principes avec les scores les plus bas (seuil < 80% pour forcer l'excellence)
+      const lowScoringPrinciples = principles
+        .filter(p => p.score < 80) // Seuil plus élevé pour encourager l'excellence
+        .sort((a, b) => a.score - b.score);
+
+      if (lowScoringPrinciples.length === 0) {
+        recommendationList.innerHTML = '<li>Félicitations ! Votre auto-évaluation montre une **excellente maîtrise de tous les principes**. Vous respectez l\'impératif de l\'excellence systémique du cadre.</li>';
+      } else {
+        recommendationList.innerHTML += `<li>**Raisonnement :** L\'écosystème IA est un système, un seul curseur faible peut annuler les gains des autres. Visez l\'excellence (80% minimum) pour sécuriser vos pratiques.</li>`;
+        
+        lowScoringPrinciples.slice(0, 3).forEach(p => {
+          let advice = '';
+          switch(p.id) {
+            case 'slider-data':
+              advice = `**Vigilance sur les données (RGPD) :** Un score bas expose à la violation du RGPD. Rappelez-vous : il est **strictement interdit** de saisir des données personnelles d\' élèves (noms, notes, copies) dans les IA grand public (p.8 du cadre).`;
+              break;
+            case 'slider-impact':
+              advice = `**Impact environnemental (Frugalité) :** Un score faible indique un risque de non-frugalité. **L\'IA est 10x plus énergivore qu\'une recherche web.** N\'utilisez l\'IA que si une solution moins coûteuse (papier, recherche classique) ne suffit pas (p.8).`;
+              break;
+            case 'slider-transparency':
+              advice = `**Transparence :** Un score faible signifie un risque de méfiance. Vous devez **TOUJOURS** informer explicitement les élèves et les parents de l\'usage de l\'IA pour la conception de supports (p.9).`;
+              break;
+            case 'slider-critique':
+              advice = `**Esprit critique :** L\'IA "hallucine". Un score faible indique un risque de propagation d\'erreurs ou de biais. Il est impératif de **former les élèves** à la vérification systématique des sources de l\'IA (p.13).`;
+              break;
+            case 'slider-human':
+              advice = `**Supervision Humaine :** C\'est la ligne rouge. L\'IA peut assister, mais elle ne doit ** JAMAIS** se substituer au jugement professionnel dans la prise de décision finale (ex: notes, appréciations de bulletin) (p.9).`;
+              break;
+            case 'slider-level':
+              advice = `**Progressivité :** Un score faible pourrait entraîner un usage non adapté. L\'usage en classe n\'est autorisé de manière encadrée qu\'à partir de la **4e**. Au primaire, l\'activité doit se limiter à la sensibilisation (p.9).`;
+              break;
+            default:
+              advice = `Domaine à revoir : ${p.name}.`;
+          }
+          recommendationList.innerHTML += `<li>${advice}</li>`;
+        });
+      }
+
+      // Afficher le conteneur des résultats
+      const resultsContainer = document.getElementById('results-container');
+      resultsContainer.style.display = 'block';
+      
+      // Défilement vers les résultats
+      resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    
+    // 3. Initialisation au chargement
+    function initializeBilan() {
+        const sliders = document.querySelectorAll('.mastery-slider');
+        sliders.forEach(slider => {
+            updateSliderValue(slider); // Afficher la valeur initiale (50%)
+        });
+        // Masquer les résultats au départ
+        document.getElementById('results-container').style.display = 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', initializeBilan);
+  </script>
+</body>
+</html>
